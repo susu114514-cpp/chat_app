@@ -12,8 +12,8 @@ app.set('trust proxy', true); // Render 反向代理后取真实 IP
 const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3000;
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || ''; // 未设置则禁用管理员功能
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_HISTORY = 100;
 const MAX_TEXT = 1000;
 
@@ -24,12 +24,18 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 const io = new Server(server, {
   cors: { origin: allowedOrigins, methods: ['GET', 'POST'] },
   transports: ['websocket', 'polling'],
-  maxHttpBufferSize: 1e6
+  maxHttpBufferSize: 1e6,
+  pingInterval: 25000,
+  pingTimeout: 60000 // 60s，给大文件上传留出余量，避免上传中误判断线
 });
 
-// ===== 上传 =====
+// ===== 目录 =====
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+const DATA_DIR = path.join(__dirname, 'data');
+fs.mkdirSync(DATA_DIR, { recursive: true });
+const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
 
 const IMAGE_MIME = {
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
@@ -72,7 +78,6 @@ app.get('/uploads/:filename', (req, res) => {
   if (filename !== req.params.filename) return res.status(400).end();
   const filePath = path.join(UPLOAD_DIR, filename);
   if (!fs.existsSync(filePath)) return res.status(404).send('Not found');
-
   const ext = path.extname(filename).toLowerCase();
   res.setHeader('X-Content-Type-Options', 'nosniff');
   if (IMAGE_MIME[ext]) {
@@ -87,12 +92,37 @@ app.get('/uploads/:filename', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ===== 历史消息持久化 =====
+function loadHistory() {
+  try {
+    if (!fs.existsSync(HISTORY_FILE)) return [];
+    const arr = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
+    return Array.isArray(arr) ? arr.slice(-MAX_HISTORY) : [];
+  } catch (e) {
+    console.error('load history failed:', e.message);
+    return [];
+  }
+}
+
+const messageHistory = loadHistory();
+
+let saveTimer = null;
+function saveHistorySoon() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      fs.writeFileSync(HISTORY_FILE, JSON.stringify(messageHistory.slice(-MAX_HISTORY)));
+    } catch (e) {
+      console.error('save history failed:', e.message);
+    }
+  }, 500);
+}
+
 // ===== 状态 =====
-const messageHistory = [];
-const onlineUsers = new Map();       // socketId -> { username, ip }
-const ipUserMap = new Map();         // ip -> username
-const mutedUsers = new Map();        // username -> expiresAt (Infinity = 永久)
-const bannedIps = new Map();         // ip -> expiresAt (Infinity = 永久)
+const onlineUsers = new Map();    // socketId -> { username, ip }
+const ipUserMap = new Map();      // ip -> username
+const mutedUsers = new Map();     // username -> expiresAt (Infinity = 永久)
+const bannedIps = new Map();      // ip -> expiresAt (Infinity = 永久)
 
 const STICKERS = [
   '😀','😁','😂','🤣','😊','😍','😘','😎','🤔','😴',
@@ -145,11 +175,9 @@ function isBanned(ip) {
 
 // ===== 广播 =====
 function broadcastPresence() {
-  // 在线用户名（去重）
   const names = [...new Set([...onlineUsers.values()].map(u => u.username))];
   io.emit('online_users', names);
 
-  // 管理员额外数据（去重按用户名，多标签页只显示一次）
   const userMap = new Map();
   for (const [sid, info] of onlineUsers) {
     if (userMap.has(info.username)) continue;
@@ -180,7 +208,6 @@ function joinChat(socket, name, ip) {
   socket.emit('history', messageHistory);
   io.emit('system', `${name} 加入了聊天`);
 
-  // 若该用户此前被禁言，join 后立即通知（重连/刷新场景）
   if (isMuted(name)) {
     socket.emit('you_are_muted', { until: mutedUsers.get(name) });
   }
@@ -248,15 +275,20 @@ io.on('connection', (socket) => {
   socket.on('reset_identity', () => {
     const ip = socket.userIp || getClientIp(socket);
     if (ip) ipUserMap.delete(ip);
+
     const info = onlineUsers.get(socket.id);
     if (info) {
       onlineUsers.delete(socket.id);
       socket.broadcast.emit('system', `${info.username} 离开了聊天`);
-      broadcastPresence();
     }
+
     socket.username = null;
     socket.userIp = null;
+    socket.isAdmin = false; // 撤销管理员身份，防止换名后仍拥有权限
+
     socket.emit('reset_ok');
+    socket.emit('admin_available', !!ADMIN_TOKEN); // 重新下发按钮可用状态
+    broadcastPresence();
   });
 
   // ===== 管理员登录 =====
@@ -333,7 +365,6 @@ io.on('connection', (socket) => {
     for (const ip of ips) bannedIps.set(ip, until);
     io.emit('system', `${username} 及其 IP 被管理员封禁${until === Infinity ? '（永久）' : ''}`);
 
-    // 先收集再断开，避免遍历中被修改
     const toDisconnect = [];
     for (const [sid, info] of onlineUsers) {
       if (ips.has(info.ip)) toDisconnect.push(sid);
@@ -359,7 +390,6 @@ io.on('connection', (socket) => {
     const info = onlineUsers.get(socket.id);
     if (!info) return;
 
-    // 禁言检查（管理员不受影响）
     if (!socket.isAdmin && isMuted(info.username)) {
       return socket.emit('you_are_muted', { until: mutedUsers.get(info.username) });
     }
@@ -408,6 +438,7 @@ io.on('connection', (socket) => {
 
     messageHistory.push(msg);
     if (messageHistory.length > MAX_HISTORY) messageHistory.shift();
+    saveHistorySoon();
     io.emit('chat_message', msg);
   });
 
