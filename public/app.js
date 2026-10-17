@@ -5,7 +5,7 @@ const socket = io({
   reconnectionDelayMax: 5000
 });
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 与服务端保持一致
 
 const $ = (id) => document.getElementById(id);
 
@@ -69,10 +69,12 @@ const EMOJIS = [
 let currentUser = null;
 let pendingUsername = null;
 let manualLogin = false;
+let historyLoaded = false;   // 首次加载 / 重连 区分
 let typingTimeout = null;
 let stickers = [];
 let typingUsers = new Map();
 let isAdmin = false;
+let adminAvailable = false;
 let kickedByAdmin = false;
 let bannedByAdmin = false;
 let mutedUntil = 0;
@@ -93,6 +95,12 @@ function showLoginForm() {
   usernameInput.disabled = false;
   loginForm.querySelector('button').disabled = false;
   usernameInput.focus();
+}
+
+// 统一管理 header 上的管理员按钮状态
+function updateAdminButtons() {
+  adminLoginBtn.classList.toggle('hidden', !adminAvailable || isAdmin);
+  adminPanelBtn.classList.toggle('hidden', !isAdmin);
 }
 
 // ===== 手动登录 =====
@@ -145,6 +153,7 @@ socket.on('auto_login_result', (res) => {
   }
 });
 
+// ===== 历史消息：首次加载清空，重连只补缺 =====
 socket.on('history', (history) => {
   if (!currentUser && pendingUsername) {
     currentUser = pendingUsername;
@@ -152,8 +161,20 @@ socket.on('history', (history) => {
     enterChat();
   }
   pendingUsername = null;
-  messagesEl.innerHTML = '';
-  history.forEach((msg) => appendMessage(msg, false));
+
+  if (!historyLoaded) {
+    messagesEl.innerHTML = '';
+    history.forEach((msg) => appendMessage(msg, false));
+    historyLoaded = true;
+  } else {
+    const existing = new Set(
+      [...messagesEl.querySelectorAll('.message[data-msg-id]')]
+        .map((el) => el.dataset.msgId)
+    );
+    history.forEach((msg) => {
+      if (!existing.has(msg.id)) appendMessage(msg, false);
+    });
+  }
   messagesEl.scrollTop = messagesEl.scrollHeight;
 });
 
@@ -168,11 +189,15 @@ socket.on('reset_ok', () => {
   pendingUsername = null;
   manualLogin = false;
   isAdmin = false;
-  adminPanelBtn.classList.add('hidden');
+  historyLoaded = false;
+  mutedUntil = 0;
+  applyMuteState();
   adminPanelModal.classList.add('hidden');
+  adminLoginModal.classList.add('hidden');
   messageInput.value = '';
   usernameInput.value = '';
   showLoginForm();
+  updateAdminButtons();   // 恢复 🔑
 });
 
 // ===== 表情包 =====
@@ -194,7 +219,11 @@ messageForm.addEventListener('submit', (e) => {
 socket.on('chat_message', (msg) => appendMessage(msg, true));
 
 function appendMessage(msg, scroll = true) {
+  if (msg.id && messagesEl.querySelector(`.message[data-msg-id="${CSS.escape(msg.id)}"]`)) {
+    return; // 去重，防止 history + live 重复
+  }
   const div = document.createElement('div');
+  if (msg.id) div.dataset.msgId = msg.id;
   const own = msg.username === currentUser;
   div.className = 'message ' + (own ? 'own' : 'other');
 
@@ -482,12 +511,15 @@ socket.on('kicked', ({ reason }) => {
   pendingUsername = null;
   manualLogin = false;
   isAdmin = false;
+  historyLoaded = false;
   socket.disconnect();
-  adminPanelBtn.classList.add('hidden');
+  adminPanelModal.classList.add('hidden');
+  adminLoginModal.classList.add('hidden');
   chatPanel.classList.add('hidden');
   loginPanel.classList.remove('hidden');
   loginHint.textContent = reason || '你被管理员踢出，可以重新进入';
   loginError.textContent = '';
+  updateAdminButtons();
 });
 
 socket.on('banned', ({ until }) => {
@@ -531,7 +563,8 @@ socket.on('disconnect', () => {
 
 // ===== 管理员登录 =====
 socket.on('admin_available', (available) => {
-  adminLoginBtn.classList.toggle('hidden', !available);
+  adminAvailable = available;
+  updateAdminButtons();
 });
 
 adminLoginBtn.addEventListener('click', () => {
@@ -570,9 +603,7 @@ socket.on('admin_login_result', (res) => {
   if (res.ok) {
     isAdmin = true;
     closeAdminLogin();
-    adminLoginBtn.classList.add('hidden');
-    adminPanelBtn.classList.remove('hidden');
-    adminPanelBtn.textContent = '🛡️ 管理';
+    updateAdminButtons();
   } else {
     adminLoginError.textContent = res.error || '登录失败';
   }
@@ -757,3 +788,4 @@ function unbanIp(ip) {
 
 // 初始化
 renderEmojiGrid();
+updateAdminButtons();
