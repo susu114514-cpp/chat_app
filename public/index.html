@@ -11,7 +11,7 @@
     <!-- 登录面板 -->
     <div id="login-panel" class="panel">
       <h1>💬 聊天室</h1>
-      <p class="hint">输入一个昵称，开始聊天</p>
+      <p class="hint" id="login-hint">正在检查上次会话…</p>
       <form id="login-form">
         <input id="username-input" type="text" placeholder="你的昵称" maxlength="20" autocomplete="off" />
         <button type="submit">进入聊天</button>
@@ -26,17 +26,75 @@
           <span id="current-user"></span>
           <span id="connection-status" class="status-dot offline"></span>
         </div>
-        <div id="online-count"></div>
+        <div class="header-right">
+          <span id="online-count"></span>
+          <button type="button" id="admin-login-btn" class="small-btn" title="管理员登录">🔑</button>
+          <button type="button" id="admin-panel-btn" class="small-btn hidden" title="管理面板">🛡️</button>
+          <button type="button" id="change-name-btn" class="small-btn">换个昵称</button>
+        </div>
       </header>
 
       <div id="messages" class="messages"></div>
-
       <div id="typing-indicator" class="typing hidden"></div>
+      <div id="mute-banner" class="mute-banner hidden"></div>
+
+      <!-- 表情面板 -->
+      <div id="emoji-panel" class="emoji-panel hidden">
+        <div class="emoji-tabs">
+          <button type="button" class="tab active" data-tab="emoji">😀 表情</button>
+          <button type="button" class="tab" data-tab="sticker">🎨 表情包</button>
+        </div>
+        <div id="emoji-grid" class="emoji-grid"></div>
+        <div id="sticker-grid" class="emoji-grid sticker-grid hidden"></div>
+      </div>
+
+      <div id="upload-status" class="upload-status hidden"></div>
 
       <form id="message-form" class="input-area">
+        <button type="button" id="emoji-btn" class="icon-btn" title="表情">😀</button>
+        <button type="button" id="image-btn" class="icon-btn" title="发送图片">🖼️</button>
+        <button type="button" id="file-btn" class="icon-btn" title="发送文件">📎</button>
+        <input type="file" id="image-input" accept="image/*" hidden />
+        <input type="file" id="file-input" hidden />
         <input id="message-input" type="text" placeholder="输入消息..." maxlength="1000" autocomplete="off" />
         <button type="submit">发送</button>
       </form>
+    </div>
+  </div>
+
+  <!-- 管理员登录模态框 -->
+  <div id="admin-login-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🔑 管理员登录</h3>
+        <button type="button" id="admin-login-close" class="close-btn">×</button>
+      </div>
+      <input type="password" id="admin-token-input" class="modal-input" placeholder="管理员密码" autocomplete="off" />
+      <p id="admin-login-error" class="error"></p>
+      <div class="modal-actions">
+        <button type="button" id="admin-cancel-btn" class="small-btn">取消</button>
+        <button type="button" id="admin-confirm-btn">登录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 管理面板模态框 -->
+  <div id="admin-panel-modal" class="modal hidden">
+    <div class="modal-content admin-modal-content">
+      <div class="modal-header">
+        <h3>🛡️ 管理面板</h3>
+        <button type="button" id="admin-panel-close" class="close-btn">×</button>
+      </div>
+      <div class="modal-body">
+        <section class="admin-section">
+          <h4>在线用户 <span id="admin-user-count"></span></h4>
+          <div id="admin-users-list" class="admin-list"></div>
+        </section>
+        <section class="admin-section">
+          <h4>封禁列表 <span id="admin-ban-count"></span></h4>
+          <div id="admin-banned-list" class="admin-list"></div>
+        </section>
+      </div>
     </div>
   </div>
 
