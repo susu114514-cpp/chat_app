@@ -212,3 +212,237 @@ button:hover {
     border-radius: 0;
   }
 }
+/* ===== 禁用按钮 ===== */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== 禁言提示条 ===== */
+.mute-banner {
+  background: #7f1d1d;
+  color: #fecaca;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ===== 模态框 ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: #1e293b;
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-modal-content {
+  max-width: 680px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.modal-header h3 {
+  font-size: 1.15rem;
+}
+
+.close-btn {
+  background: transparent;
+  color: #94a3b8;
+  padding: 0.1rem 0.6rem;
+  font-size: 1.5rem;
+  line-height: 1;
+  border-radius: 6px;
+}
+
+.close-btn:hover {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+.modal-body {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  flex-shrink: 0;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 1rem;
+  outline: none;
+}
+
+.modal-input:focus {
+  border-color: #38bdf8;
+}
+
+/* ===== 管理面板 ===== */
+.admin-section {
+  margin-bottom: 1.5rem;
+}
+
+.admin-section h4 {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  color: #94a3b8;
+}
+
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-user-row,
+.ban-row {
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+}
+
+.admin-user-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-user-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-user-name {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.admin-user-ip {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-family: ui-monospace, monospace;
+  word-break: break-all;
+}
+
+.badge {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.badge-admin { background: #f59e0b; color: #0f172a; }
+.badge-muted { background: #f87171; color: #0f172a; }
+.badge-you   { background: #38bdf8; color: #0f172a; }
+
+.admin-user-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.admin-action-btn {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-radius: 6px;
+  background: #334155;
+  color: #e2e8f0;
+}
+
+.admin-action-btn:hover {
+  background: #475569;
+}
+
+.admin-action-btn.danger {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+
+.admin-action-btn.danger:hover {
+  background: #991b1b;
+}
+
+.admin-empty {
+  color: #64748b;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.75rem;
+}
+
+.ban-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ban-ip {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.ban-time {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 600px) {
+  .admin-user-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .admin-user-actions {
+    justify-content: flex-end;
+  }
+}
