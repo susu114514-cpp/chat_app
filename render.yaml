@@ -8,6 +8,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # 如果需要限制 CORS 来源，取消下面注释并填入你的实际域名
+      - key: ADMIN_TOKEN
+        sync: false   # 在 Render 后台手动填写，不写进仓库
       # - key: ALLOWED_ORIGINS
       #   value: https://your-chat-app.onrender.com
