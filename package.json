@@ -1,6 +1,6 @@
 {
   "name": "render-chat-app",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A simple real-time chat app deployable on Render",
   "main": "server.js",
   "scripts": {
