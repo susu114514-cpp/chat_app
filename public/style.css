@@ -33,11 +33,9 @@ body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
 
-/* 登录面板 */
+/* ===== 登录面板 ===== */
 #login-panel {
   justify-content: center;
   align-items: center;
@@ -52,6 +50,7 @@ body {
 .hint {
   color: #94a3b8;
   margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 #login-form {
@@ -72,9 +71,7 @@ body {
   outline: none;
 }
 
-#username-input:focus {
-  border-color: #38bdf8;
-}
+#username-input:focus { border-color: #38bdf8; }
 
 button {
   padding: 0.75rem 1.5rem;
@@ -88,9 +85,8 @@ button {
   transition: background 0.2s;
 }
 
-button:hover {
-  background: #7dd3fc;
-}
+button:hover { background: #7dd3fc; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .error {
   color: #f87171;
@@ -98,7 +94,7 @@ button:hover {
   min-height: 1.2em;
 }
 
-/* 聊天面板 */
+/* ===== 聊天面板 ===== */
 #chat-panel header {
   display: flex;
   justify-content: space-between;
@@ -108,6 +104,23 @@ button:hover {
   border-bottom: 1px solid #334155;
   flex-shrink: 0;
 }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.small-btn {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 8px;
+  background: #334155;
+  color: #e2e8f0;
+}
+
+.small-btn:hover { background: #475569; }
 
 .status-dot {
   display: inline-block;
@@ -171,6 +184,53 @@ button:hover {
   padding: 0.25rem 0;
 }
 
+/* ===== 消息内容 ===== */
+.chat-image {
+  max-width: 100%;
+  max-height: 320px;
+  border-radius: 8px;
+  cursor: zoom-in;
+  display: block;
+}
+
+.sticker {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.file-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  min-width: 180px;
+  transition: background 0.15s;
+}
+
+.file-card:hover { background: rgba(0, 0, 0, 0.4); }
+
+.file-icon { font-size: 1.5rem; }
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+
+.file-size {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
 .typing {
   padding: 0 1.25rem 0.5rem;
   font-size: 0.8rem;
@@ -180,13 +240,102 @@ button:hover {
   flex-shrink: 0;
 }
 
+.upload-status {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  color: #38bdf8;
+  background: #0f172a;
+  border-top: 1px solid #334155;
+  flex-shrink: 0;
+}
+
+.mute-banner {
+  background: #7f1d1d;
+  color: #fecaca;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ===== 表情面板 ===== */
+.emoji-panel {
+  border-top: 1px solid #334155;
+  background: #1e293b;
+  flex-shrink: 0;
+}
+
+.emoji-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0;
+}
+
+.emoji-tabs .tab {
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.emoji-tabs .tab:hover {
+  background: transparent;
+  color: #e2e8f0;
+}
+
+.emoji-tabs .tab.active {
+  color: #38bdf8;
+  border-bottom-color: #38bdf8;
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: 2px;
+  padding: 0.5rem 1rem 1rem;
+  max-height: 210px;
+  overflow-y: auto;
+}
+
+.emoji-grid button {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 0.25rem;
+  font-size: 1.4rem;
+  line-height: 1;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.emoji-grid button:hover { background: #334155; }
+.sticker-grid button { font-size: 2rem; }
+
+/* ===== 输入区 ===== */
 .input-area {
   display: flex;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.5rem;
   padding: 1rem 1.25rem;
   border-top: 1px solid #334155;
   flex-shrink: 0;
 }
+
+.input-area .icon-btn {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.input-area .icon-btn:hover { background: #334155; }
 
 #message-input {
   flex: 1;
@@ -197,36 +346,10 @@ button:hover {
   color: #e2e8f0;
   font-size: 1rem;
   outline: none;
+  min-width: 0;
 }
 
-#message-input:focus {
-  border-color: #38bdf8;
-}
-
-@media (max-width: 600px) {
-  #app {
-    max-height: none;
-    border-radius: 0;
-  }
-  .panel {
-    border-radius: 0;
-  }
-}
-/* ===== 禁用按钮 ===== */
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ===== 禁言提示条 ===== */
-.mute-banner {
-  background: #7f1d1d;
-  color: #fecaca;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  text-align: center;
-  flex-shrink: 0;
-}
+#message-input:focus { border-color: #38bdf8; }
 
 /* ===== 模态框 ===== */
 .modal {
@@ -252,9 +375,7 @@ button:disabled {
   flex-direction: column;
 }
 
-.admin-modal-content {
-  max-width: 680px;
-}
+.admin-modal-content { max-width: 680px; }
 
 .modal-header {
   display: flex;
@@ -264,9 +385,7 @@ button:disabled {
   flex-shrink: 0;
 }
 
-.modal-header h3 {
-  font-size: 1.15rem;
-}
+.modal-header h3 { font-size: 1.15rem; }
 
 .close-btn {
   background: transparent;
@@ -307,14 +426,10 @@ button:disabled {
   outline: none;
 }
 
-.modal-input:focus {
-  border-color: #38bdf8;
-}
+.modal-input:focus { border-color: #38bdf8; }
 
 /* ===== 管理面板 ===== */
-.admin-section {
-  margin-bottom: 1.5rem;
-}
+.admin-section { margin-bottom: 1.5rem; }
 
 .admin-section h4 {
   font-size: 0.95rem;
@@ -398,18 +513,9 @@ button:disabled {
   color: #e2e8f0;
 }
 
-.admin-action-btn:hover {
-  background: #475569;
-}
-
-.admin-action-btn.danger {
-  background: #7f1d1d;
-  color: #fecaca;
-}
-
-.admin-action-btn.danger:hover {
-  background: #991b1b;
-}
+.admin-action-btn:hover { background: #475569; }
+.admin-action-btn.danger { background: #7f1d1d; color: #fecaca; }
+.admin-action-btn.danger:hover { background: #991b1b; }
 
 .admin-empty {
   color: #64748b;
@@ -438,11 +544,9 @@ button:disabled {
 }
 
 @media (max-width: 600px) {
-  .admin-user-top {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .admin-user-actions {
-    justify-content: flex-end;
-  }
+  #app { max-height: none; border-radius: 0; }
+  .panel { border-radius: 0; }
+  .emoji-grid { grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); }
+  .admin-user-top { flex-direction: column; align-items: stretch; }
+  .admin-user-actions { justify-content: flex-end; }
 }
