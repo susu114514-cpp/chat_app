@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: render-chat-app
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # 如果需要限制 CORS 来源，取消下面注释并填入你的实际域名
+      # - key: ALLOWED_ORIGINS
+      #   value: https://your-chat-app.onrender.com

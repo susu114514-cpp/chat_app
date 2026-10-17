@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Render 聊天室</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 登录面板 -->
+    <div id="login-panel" class="panel">
+      <h1>💬 聊天室</h1>
+      <p class="hint">输入一个昵称，开始聊天</p>
+      <form id="login-form">
+        <input id="username-input" type="text" placeholder="你的昵称" maxlength="20" autocomplete="off" />
+        <button type="submit">进入聊天</button>
+      </form>
+      <p id="login-error" class="error"></p>
+    </div>
+
+    <!-- 聊天主界面 -->
+    <div id="chat-panel" class="panel hidden">
+      <header>
+        <div>
+          <span id="current-user"></span>
+          <span id="connection-status" class="status-dot offline"></span>
+        </div>
+        <div id="online-count"></div>
+      </header>
+
+      <div id="messages" class="messages"></div>
+
+      <div id="typing-indicator" class="typing hidden"></div>
+
+      <form id="message-form" class="input-area">
+        <input id="message-input" type="text" placeholder="输入消息..." maxlength="1000" autocomplete="off" />
+        <button type="submit">发送</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
